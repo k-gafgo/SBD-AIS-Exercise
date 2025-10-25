@@ -1,12 +1,9 @@
-  # todo
- # 1st stage: builder
 FROM golang:1.25 AS build
 WORKDIR /app
 COPY . .
+RUN bash scripts/build-application.sh
 
-RUN scripts/build-application.sh
-
-FROM alpine
-COPY --from=build /ordersystem/script/build-application.sh /ordersystem/script/
-RUN go build main.go
-
+FROM alpine:latest
+WORKDIR /app
+COPY --from=build /app/ordersystem /ordersystem
+ENTRYPOINT ["/ordersystem"]

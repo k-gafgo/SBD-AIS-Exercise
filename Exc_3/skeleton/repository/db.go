@@ -80,20 +80,29 @@ func prepopulate(dbConn *gorm.DB) error {
 		return nil
 	}
 	// create drink menu
-	// todo create drinks
-	// todo create orders
+	// create drinks
 	drinks := []model.Drink{
 		{Name: "Coke", Price: 3.1, Description: "original Coca Cola"},
 		{Name: "Fanta", Price: 2.99, Description: "choose from our flavors: Orange and Mango"},
 		{Name: "Iced Tea", Price: 2.50, Description: "choose from our flavors: Orange and Lemon"},
 	}
-	//var users = []User{{Name: "jinzhu1"}, {Name: "jinzhu2"}, {Name: "jinzhu3"}}
-	gorm.DB.Create(&drinks)
 
-	//esult := *gorm.DB.Create(drinks) // pass a slice to insert multiple row
+	result := dbConn.Create(&drinks)
+	if result.Error != nil {
+		return fmt.Errorf("failed to insert drinks: %w", result.Error)
+	}
 
-	//result.Error        // returns error
-	//result.RowsAffected // returns inserted records count
+	// create orders
+	orders := []model.Order{
+		{Amount: 1, DrinkID: 1, Drink: drinks[0]},
+		{Amount: 5, DrinkID: 2, Drink: drinks[1]},
+		{Amount: 3, DrinkID: 3, Drink: drinks[2]},
+	}
+
+	result = dbConn.Create(&orders)
+	if result.Error != nil {
+		return fmt.Errorf("failed to insert orders: %w", result.Error)
+	}
 
 	// GORM documentation can be found here: https://gorm.io/docs/index.html
 
