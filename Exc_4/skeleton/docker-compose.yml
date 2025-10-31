@@ -1,1 +1,29 @@
-# todo
+networks:
+  ordernet:
+
+volumes:
+  postgres-volume:
+
+services:
+  postgres-db:
+    image: postgres:18
+    networks:
+      - ordernet
+    ports:
+      - "5433:5432"
+    env_file:
+      - "debug.env"
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+
+  order-service:
+    build: .
+    networks:
+      - ordernet
+    ports:
+      - "3000:3000"
+    command: [ "/app/ordersystem" ]
+    env_file:
+      - "debug.env"
+    depends_on:
+      - postgres-db
