@@ -104,7 +104,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/order/total": {
+        "/api/order/totalled": {
             "get": {
                 "description": "Gets totalled orders",
                 "produces": [

@@ -107,7 +107,7 @@ paths:
           description: Internal Server Error
       tags:
       - Order
-  /api/order/total:
+  /api/order/totalled:
     get:
       description: Gets totalled orders
       produces:

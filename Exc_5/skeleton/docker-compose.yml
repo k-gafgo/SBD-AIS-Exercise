@@ -10,17 +10,34 @@ volumes:
 services:
   traefik:
     image: "traefik:v3.5.2"
-    # todo add traefik config
-    # todo only expose network web
+    # traefik config
+    container_name: "traefik"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    # only expose network web
     networks:
       - web
-
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=web"
+      - "--entryPoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   orderservice:
     container_name: orderservice
     build: .
     command: [ "/app/ordersystem" ]
-    # todo add traefik labels
+    # traefik labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.orders.rule=Host(`orders.localhost`)"
+      - "traefik.http.routers.orders.entrypoints=web"
+      - "--entryPoints.web.address=:3000"
     environment:
       - POSTGRES_DB=order
       - POSTGRES_USER=docker
@@ -33,14 +50,27 @@ services:
 
   sws:
     image: joseluisq/static-web-server:latest
-    # todo add frontend folder as volume
-    # todo setup environment variables to expose port 80 and serve the frontend folder
-    # todo add traefik labels
+    # add frontend folder as volume
+    volumes:
+      - ./frontend:/public
+    # setup environment variables to expose port 80 and serve the frontend folder
+    environment:
+      - SERVER_ROOT=/public
+      - SERVER_LOG_LEVEL=debug
+      - SERVER_PORT=80
+    restart: unless-stopped
+    # traefik labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.website.entrypoints=web"
+      - "traefik.http.routers.website.rule=Host(`localhost`)"
+      - "traefik.http.routers.website.priority=1"
+      - "traefik.http.services.website.loadbalancer.server.port=80"
     networks:
       - web
 
   order-postgres:
-    image: postgres:latest
+    image: postgres:18
     restart: always
     networks:
       - intercom
