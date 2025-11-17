@@ -1,0 +1,5 @@
+when the script execution of build-application.sh causes errors, check: 
+- line endings of build-application.sh -> open the file in VS Code and set them from CRLF to LF (bottom right) 
+- if many errors occur corresponding to go.sum -> in the shell (locally) run go mod tidy
+
+then it should work!!

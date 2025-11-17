@@ -113,7 +113,6 @@ func GetReceiptFile(db *repository.DatabaseHandler, s3 *minio.Client) http.Handl
 		}
 
 		// read from s3
-		// todo
 		file, err := s3.GetObject(r.Context(), storage.OrdersBucket, order.GetFilename(), minio.GetObjectOptions{})
 		// Get the file from s3 using s3.GetObject(), the bucket name is defined in storage.OrdersBucket
 		// order.Filename() can be used to get the filename.
@@ -126,11 +125,10 @@ func GetReceiptFile(db *repository.DatabaseHandler, s3 *minio.Client) http.Handl
 		}
 
 		// serve file
-		// todo
 		w.Header().Set("Content-Type", "text/markdown")
 		w.Header().Set("Content-Disposition", "Content-Disposition: attachment; filename=\""+order.GetFilename()+"\"")
 		io.Copy(w, file)
-		render.JSON(w, r, "file?!")
+		render.JSON(w, r, "")
 		// set the correct header on w http.ResponseWriter ("Content-Type" and "Content-Disposition")
 		// Use the correct filename for "Content-Disposition" (https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Disposition)
 		// io.Copy can be used to write the result of s3.GetObject() to w http.ResponseWriter
@@ -174,6 +172,7 @@ func PostOrder(db *repository.DatabaseHandler, s3 *minio.Client) http.HandlerFun
 			return
 		}
 
+		// store to s3
 		text := dbOrder.ToMarkdown()
 		reader := strings.NewReader(text)
 
@@ -184,8 +183,6 @@ func PostOrder(db *repository.DatabaseHandler, s3 *minio.Client) http.HandlerFun
 			render.JSON(w, r, "Unable to add order to S3")
 			return
 		}
-		// store to s3
-		// todo
 		// call dbOrder.ToMarkdown() --> use strings.NewReader to create a reader
 		// Put the file into s3 using s3.PutObject(), the bucket name is defined in storage.OrdersBucket
 		// dbOrder.Filename() can be used to get the filename.
