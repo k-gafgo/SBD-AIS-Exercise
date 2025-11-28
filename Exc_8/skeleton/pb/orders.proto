@@ -11,9 +11,17 @@ package models;
 
 // todo implement messages
 //
-// message MyMessage {
-//  ....
-// }
+message Drink {
+  int32 id = 1;
+  string name = 2;
+  float price = 3;
+  string description = 4;
+}
+
+message Order {
+  int32 id = 1;
+  Drink drink = 2;
+}
 
 
 // Generate go files with:
@@ -21,5 +29,9 @@ package models;
 
 // Define the service
 service OrderService {
-  // todo define rpc functions
+  rpc OrderDrink(Drink) returns(google.protobuf.BoolValue);
+
+  rpc GetDrinks(google.protobuf.Empty) returns(Drink); // todo return list of Drinks?
+
+  rpc GetOrders(google.protobuf.Empty) returns(Order); // todo return list of Orders?
 }
