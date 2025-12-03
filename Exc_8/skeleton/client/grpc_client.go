@@ -24,12 +24,65 @@ func NewGrpcClient() (*GrpcClient, error) {
 }
 
 func (c *GrpcClient) Run() error {
-	// todo
+	ctx := context.Background()
 	// 1. List drinks
+	drinks, err := c.client.GetDrinks(ctx, &emptypb.Empty{})
+	if err != nil {
+		return err
+	}
+	fmt.Println("Available drinks:")
+	for _, drink := range drinks.Drinks {
+		fmt.Println("\t id:", drink.Id, " name:", drink.Name, " price:", drink.Price, " description:", drink.Description)
+	}
+
 	// 2. Order a few drinks
+	fmt.Println("Ordering drinks: ")
+	fmt.Println("\t Ordering 4 x", drinks.Drinks[2].Name)
+	_, err = c.client.OrderDrink(ctx, &pb.Order{Drink: drinks.Drinks[2], Amount: 4})
+	if err != nil {
+		return err
+	}
+	fmt.Println("\t Ordering 1 x", drinks.Drinks[0].Name)
+	_, err = c.client.OrderDrink(ctx, &pb.Order{Drink: drinks.Drinks[0], Amount: 1})
+	if err != nil {
+		return err
+	}
+	fmt.Println("\t Ordering 2 x", drinks.Drinks[1].Name)
+	_, err = c.client.OrderDrink(ctx, &pb.Order{Drink: drinks.Drinks[1], Amount: 2})
+	if err != nil {
+		return err
+	}
+
 	// 3. Order more drinks
+	fmt.Println("Ordering even more drinks!")
+	fmt.Println("\t Ordering 1 x", drinks.Drinks[2].Name)
+	_, err = c.client.OrderDrink(ctx, &pb.Order{Drink: drinks.Drinks[2], Amount: 1})
+	if err != nil {
+		return err
+	}
+	fmt.Println("\t Ordering 5 x", drinks.Drinks[0].Name)
+	_, err = c.client.OrderDrink(ctx, &pb.Order{Drink: drinks.Drinks[0], Amount: 5})
+	if err != nil {
+		return err
+	}
+	fmt.Println("\t Ordering 2 x", drinks.Drinks[1].Name)
+	_, err = c.client.OrderDrink(ctx, &pb.Order{Drink: drinks.Drinks[1], Amount: 2})
+	if err != nil {
+		return err
+	}
+
 	// 4. Get order total
-	//
-	// print responses after each call
+	fmt.Println("Getting the bill: ")
+	orders, err := c.client.GetOrders(ctx, &emptypb.Empty{})
+	if err != nil {
+		return err
+	}
+	price := float32(0)
+	for _, order := range orders.Orders {
+		fmt.Println("\t Total Amount:", order.Amount, " Name:", order.Drink.Name)
+		price += float32(order.Amount) * order.Drink.Price
+	}
+	fmt.Println("\t Total Price:", price)
+
 	return nil
 }

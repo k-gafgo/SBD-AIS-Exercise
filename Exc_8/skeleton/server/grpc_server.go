@@ -2,25 +2,33 @@ package server
 
 import (
 	"context"
+	"errors"
 	"exc8/pb"
-	"fmt"
-	"log/slog"
 	"net"
 
 	"google.golang.org/grpc"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type GRPCService struct {
 	pb.UnimplementedOrderServiceServer
+	drinks *pb.Drinks      //save drinks and orders in-memory
+	orders map[int32]int32 //save drink-id and amount, where drink-id is the key
 }
 
 func StartGrpcServer() error {
 	// Create a new gRPC server.
 	srv := grpc.NewServer()
 	// Create grpc service
-	grpcService := &GRPCService{}
+	grpcService := &GRPCService{
+		drinks: &pb.Drinks{Drinks: make([]*pb.Drink, 3)},
+		orders: make(map[int32]int32),
+	}
+	// Prepopulate Drinks
+	grpcService.drinks.Drinks[0] = &pb.Drink{Id: 0, Name: "Coca Cola", Price: 10, Description: "Choose between Zero and Light"}
+	grpcService.drinks.Drinks[1] = &pb.Drink{Id: 1, Name: "Iced Tea", Price: 5, Description: "Choose between Peach and Lemon"}
+	grpcService.drinks.Drinks[2] = &pb.Drink{Id: 2, Name: "Fanta", Price: 50, Description: "Try the new flavour Mango or stick with Orange"}
 	// Register our service implementation with the gRPC server.
 	pb.RegisterOrderServiceServer(srv, grpcService)
 	// Serve gRPC server on port 4000.
@@ -35,4 +43,31 @@ func StartGrpcServer() error {
 	return nil
 }
 
-// todo implement functions
+func (s *GRPCService) OrderDrink(ctx context.Context, order *pb.Order) (*wrapperspb.BoolValue, error) {
+	// check if drink id is valid
+	if order.Drink.Id >= int32(len(s.drinks.Drinks)) || order.Drink.Id < 0 {
+		return &wrapperspb.BoolValue{Value: false}, errors.New("Invalid Drink Id!")
+	}
+	s.orders[order.Drink.Id] += order.Amount
+	return wrapperspb.Bool(true), nil
+}
+
+func (s *GRPCService) GetDrinks(ctx context.Context, empty *emptypb.Empty) (*pb.Drinks, error) {
+	if s.drinks == nil {
+		return nil, errors.New("No Drinks!")
+	}
+	return s.drinks, nil
+}
+
+func (s *GRPCService) GetOrders(ctx context.Context, empty *emptypb.Empty) (*pb.Orders, error) {
+	if s.orders == nil {
+		return nil, errors.New("No Orders!")
+	}
+	order_list := pb.Orders{}
+	for key, value := range s.orders {
+		//append orders to the list
+		order_list.Orders = append(order_list.Orders, &pb.Order{Amount: value, Drink: s.drinks.Drinks[key]})
+	}
+
+	return &order_list, nil
+}

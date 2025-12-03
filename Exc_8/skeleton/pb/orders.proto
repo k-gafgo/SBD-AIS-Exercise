@@ -8,9 +8,6 @@ option go_package = "exc8/pb";
 package models;
 
 // Messages
-
-// todo implement messages
-//
 message Drink {
   int32 id = 1;
   string name = 2;
@@ -18,20 +15,27 @@ message Drink {
   string description = 4;
 }
 
+message Drinks {
+  repeated Drink drinks = 1;
+}
+
 message Order {
-  int32 id = 1;
+  int32 amount = 1;
   Drink drink = 2;
 }
 
+message Orders {
+  repeated Order orders = 1;
+}
 
 // Generate go files with:
 // Execute `generate_pb.sh`
 
 // Define the service
 service OrderService {
-  rpc OrderDrink(Drink) returns(google.protobuf.BoolValue);
+  rpc OrderDrink(Order) returns(google.protobuf.BoolValue);
 
-  rpc GetDrinks(google.protobuf.Empty) returns(Drink); // todo return list of Drinks?
+  rpc GetDrinks(google.protobuf.Empty) returns(Drinks);
 
-  rpc GetOrders(google.protobuf.Empty) returns(Order); // todo return list of Orders?
+  rpc GetOrders(google.protobuf.Empty) returns(Orders);
 }
