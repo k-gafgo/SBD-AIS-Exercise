@@ -7,7 +7,7 @@ will be read into memory, then a MapReduce implementation will count the frequen
 - [ ] Implement the MapReduce algorithm and all functions required by the `MapReduceInterface`
   - The algorithm should run concurrently --> use go routines!
   - Filter out all special chars and numericals (RegEx) in the map-function or before
-- [ ] Your implementation works if it pases all supplied tests in `map_reduce_test.go`
+- [ ] Your implementation works if it passes all supplied tests in `map_reduce_test.go`
   - Tests can be run with `go test ./mapred` 
 - [ ] Once you've finished the implementation, compute the word frequency of the input text
 
